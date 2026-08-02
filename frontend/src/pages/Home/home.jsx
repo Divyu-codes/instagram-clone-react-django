@@ -1,5 +1,6 @@
 import Sidebar from "../../components/layout/Sidebar";
 import PostCard from "../../components/post/PostCard";
+import posts from "../../data/posts";
 
 function Home() {
   return (
@@ -9,7 +10,16 @@ function Home() {
 
       <div className="flex-1 p-8 bg-gray-100">
 
-        <PostCard />
+        {posts.map((post) => (
+          <PostCard
+            key={post.id}
+            username={post.username}
+            location={post.location}
+            image={post.image}
+            likes={post.likes}
+            caption={post.caption}
+          />
+        ))}
 
       </div>
 

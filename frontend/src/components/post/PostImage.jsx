@@ -1,10 +1,11 @@
-function PostImage() {
+function PostImage({ image }) {
     return (
-         <div className="w-full h-96 bg-gray-200 flex items-center justify-center">
-
-      Image
-
-    </div>
+        <img
+            src={image}
+            alt="post"
+            className="w-full h-96 object-cover"
+        />
     );
 }
+
 export default PostImage;
