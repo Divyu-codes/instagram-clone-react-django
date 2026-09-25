@@ -10,6 +10,9 @@ backend/venv/
 # Database
 *.sqlite3
 
+# Media / uploaded files
+backend/hlo/media/
+
 # Environment
 .env
 *.env
