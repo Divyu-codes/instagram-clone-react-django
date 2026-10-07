@@ -172,19 +172,15 @@ SIMPLE_JWT = {
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     "login": "5/minute",
 }
-
-# Development emails appear in the Django server console. Configure SMTP in production.
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-
 EMAIL_HOST_USER = 'apikey'  
-EMAIL_HOST_PASSWORD = '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' 
-
-
-DEFAULT_FROM_EMAIL = 'jyotidivyak24@gmail.com' 
+EMAIL_HOST_PASSWORD = os.getenv('SENDGRID_API_KEY') 
+DEFAULT_FROM_EMAIL = os.getenv('SENDER_EMAIL', 'jyotidivyak24@gmail.com') 
+ 
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(
