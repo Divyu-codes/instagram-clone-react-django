@@ -22,12 +22,12 @@ load_dotenv(BASE_DIR / ".env")
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-^9$16(6ic$uvaa&zva57!6pet4%s)wjtqjdlv_)1#70t+e@zms'
+SECRET_KEY =os.getenv('SECRET_KEY', 'fallback-key-for-local-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False') == 'True' 
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Local React
@@ -188,12 +188,14 @@ MEDIA_ROOT = os.path.join(
     "media"
 )
 
-CORS_ALLOW_ALL_ORIGINS = True
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
+       "default": {
+           "BACKEND": "channels_redis.core.RedisChannelLayer",
+           "CONFIG": {
+               "hosts": [os.getenv('REDIS_URL', 'redis://localhost:6379')],
+           },
+       },
+   }
 
 CLOUDINARY_STORAGE = {
     "CLOUD_NAME": os.getenv("CLOUDINARY_CLOUD_NAME"),
