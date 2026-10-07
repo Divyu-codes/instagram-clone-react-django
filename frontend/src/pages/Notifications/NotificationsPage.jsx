@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authenticatedFetch } from "../../utils/auth";
 
 const BACKEND_HOST =
   import.meta.env.VITE_BACKEND_URL ||
   "http://127.0.0.1:8000";
-
 // ======================================================
-// NOTIFICATION ICON
+// NOTIFICATION ICON (Update this)
 // ======================================================
-
 function getNotificationIcon(item) {
   const type = item.notification_type;
   const message = item.message || "";
@@ -17,77 +15,40 @@ function getNotificationIcon(item) {
     return "👤";
   }
 
-  if (type === "comment") {
-    return "💬";
+  // YEH ADD KAREIN:
+  if (type === "follow_request_accepted") {
+    return "✅";
   }
 
-  if (type === "like") {
-    return "❤️";
+  if (type === "comment") return "💬";
+  if (type === "like") return "❤️";
+  if (type === "message" || type === "story_reply") return "💌";
+
+  if (type === "story" || type === "story_view" || type === "story_reaction") {
+    if (message.includes("reacted")) return "🔥";
+    if (message.includes("viewed")) return "👁️";
+    return "";
   }
 
-  if (
-    type === "message" ||
-    type === "story_reply"
-  ) {
-    return "💌";
-  }
-
-  if (
-    type === "story" ||
-    type === "story_view" ||
-    type === "story_reaction"
-  ) {
-    if (message.includes("reacted")) {
-      return "🔥";
-    }
-
-    if (message.includes("viewed")) {
-      return "👁️";
-    }
-
-    return "⭕";
-  }
-
-  return "🔔";
+  return "";
 }
 
 // ======================================================
-// NOTIFICATION LABEL
+// NOTIFICATION LABEL (Update this)
 // ======================================================
-
 function getNotificationLabel(item) {
   const type = item.notification_type;
 
-  if (type === "follow_request") {
-    return "Follow request";
-  }
+  if (type === "follow_request") return "Follow request";
 
-  if (type === "follow") {
-    return "New follower";
-  }
+  // YEH ADD KAREIN:
+  if (type === "follow_request_accepted") return "Follow request accepted";
 
-  if (type === "like") {
-    return "Post liked";
-  }
-
-  if (type === "comment") {
-    return "New comment";
-  }
-
-  if (
-    type === "message" ||
-    type === "story_reply"
-  ) {
-    return "Story reply";
-  }
-
-  if (
-    type === "story" ||
-    type === "story_view" ||
-    type === "story_reaction"
-  ) {
-    return "Story activity";
-  }
+  if (type === "follow") return "New follower";
+  if (type === "like") return "Post liked";
+  if (type === "comment") return "New comment";
+  if (type === "message" || type === "story_reply") return "Story reply";
+  if (type === "story" || type === "story_view" || type === "story_reaction") return "Story activity";
 
   return "Notification";
 }
@@ -97,18 +58,43 @@ function getNotificationLabel(item) {
 // ======================================================
 
 function getActorId(item) {
-  const value =
-    item?.actor_id ??
-    item?.actor?.id ??
-    item?.user_id;
+  const possibleValues = [
+    item?.actor_id,
+    item?.actor?.id,
+    item?.actor?.user_id,
+    item?.user_id,
+    item?.user?.id,
+    item?.user?.user_id,
+  ];
 
-  const numberValue = Number(value);
+  for (const value of possibleValues) {
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== ""
+    ) {
+      const numberValue = Number(value);
 
-  if (!Number.isFinite(numberValue)) {
-    return null;
+      if (Number.isFinite(numberValue)) {
+        return numberValue;
+      }
+    }
   }
 
-  return numberValue;
+  return null;
+}
+
+// ======================================================
+// GET ACTOR USERNAME
+// ======================================================
+
+function getActorUsername(item) {
+  return (
+    item?.actor_username ||
+    item?.actor?.username ||
+    item?.user?.username ||
+    "User"
+  );
 }
 
 // ======================================================
@@ -116,14 +102,11 @@ function getActorId(item) {
 // ======================================================
 
 function NotificationsPage() {
-  const [notifications, setNotifications] =
-    useState([]);
+  const [notifications, setNotifications] = useState([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   // ====================================================
   // FOLLOW REQUESTS
@@ -133,8 +116,7 @@ function NotificationsPage() {
   // }
   // ====================================================
 
-  const [followRequests, setFollowRequests] =
-    useState({});
+  const [followRequests, setFollowRequests] = useState({});
 
   const [followRequestLoading, setFollowRequestLoading] =
     useState(null);
@@ -147,23 +129,36 @@ function NotificationsPage() {
     useState(null);
 
   // ====================================================
+  // IMPORTANT:
+  // SYNCHRONOUS FOLLOW-BACK LOCK
+  //
+  // React state updates are asynchronous.
+  // Therefore checking only followBackLoading is not
+  // enough to prevent two POST requests from happening
+  // almost simultaneously.
+  //
+  // useRef changes immediately and prevents duplicate
+  // follow-back requests.
+  // ====================================================
+
+  const followBackLock = useRef(false);
+
+  // ====================================================
   // FETCH FOLLOW REQUESTS
   // ====================================================
 
   const fetchFollowRequests = async () => {
     try {
-      const response =
-        await authenticatedFetch(
-          `${BACKEND_HOST}/api/follows/requests/`
-        );
+      const response = await authenticatedFetch(
+        `${BACKEND_HOST}/api/follows/requests/`
+      );
 
       if (!response.ok) {
         setFollowRequests({});
         return;
       }
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!Array.isArray(data)) {
         setFollowRequests({});
@@ -173,21 +168,14 @@ function NotificationsPage() {
       const requestMap = {};
 
       data.forEach((request) => {
-        const userId =
-          Number(
-            request?.user_id
-          );
+        const userId = Number(request?.user_id);
 
-        if (
-          Number.isFinite(userId)
-        ) {
-          requestMap[userId] =
-            request.id;
+        if (Number.isFinite(userId)) {
+          requestMap[userId] = request.id;
         }
       });
 
       setFollowRequests(requestMap);
-
     } catch (error) {
       console.error(
         "Follow requests loading error:",
@@ -202,57 +190,50 @@ function NotificationsPage() {
   // FETCH NOTIFICATIONS
   // ====================================================
 
-  const fetchNotifications =
-    async () => {
-      try {
-        setLoading(true);
-        setError("");
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-        const response =
-          await authenticatedFetch(
-            `${BACKEND_HOST}/api/notifications/`
-          );
+      const response = await authenticatedFetch(
+        `${BACKEND_HOST}/api/notifications/`
+      );
 
-        if (!response.ok) {
-          throw new Error(
-            "Failed to load notifications."
-          );
-        }
-
-        const data =
-          await response.json();
-
-        setNotifications(
-          Array.isArray(data)
-            ? data
-            : []
+      if (!response.ok) {
+        throw new Error(
+          "Failed to load notifications."
         );
-
-        // Load pending follow requests
-        await fetchFollowRequests();
-
-        // Mark notifications as read
-        await authenticatedFetch(
-          `${BACKEND_HOST}/api/notifications/mark-read/`,
-          {
-            method: "POST",
-          }
-        ).catch(() => undefined);
-
-      } catch (fetchError) {
-        console.error(
-          "Fetch notifications error:",
-          fetchError
-        );
-
-        setError(
-          "Unable to load notifications."
-        );
-
-      } finally {
-        setLoading(false);
       }
-    };
+
+      const data = await response.json();
+
+      setNotifications(
+        Array.isArray(data) ? data : []
+      );
+
+      // Load pending follow requests
+      await fetchFollowRequests();
+
+      // Mark notifications as read
+      await authenticatedFetch(
+        `${BACKEND_HOST}/api/notifications/mark-read/`,
+        {
+          method: "POST",
+        }
+      ).catch(() => undefined);
+    } catch (fetchError) {
+      console.error(
+        "Fetch notifications error:",
+        fetchError
+      );
+
+      setError(
+        "Unable to load notifications."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // ====================================================
   // INITIAL LOAD
@@ -266,305 +247,384 @@ function NotificationsPage() {
   // ACCEPT FOLLOW REQUEST
   // ====================================================
 
-  const handleAcceptFollowRequest =
-    async (
-      notification
-    ) => {
-      const actorId =
-        getActorId(notification);
+  const handleAcceptFollowRequest = async (
+    notification
+  ) => {
+    const actorId = getActorId(notification);
 
-      if (!actorId) {
-        return;
-      }
+    if (!actorId) {
+      alert(
+        "Unable to identify the user who sent this request."
+      );
+      return;
+    }
 
-      const requestId =
-        followRequests[actorId];
+    const requestId = followRequests[actorId];
 
-      if (!requestId) {
-        alert(
-          "Follow request not found. Please refresh notifications."
-        );
-        return;
-      }
+    if (!requestId) {
+      alert(
+        "Follow request not found. Please refresh notifications."
+      );
+      return;
+    }
+
+    try {
+      setFollowRequestLoading(notification.id);
+
+      const response = await authenticatedFetch(
+        `${BACKEND_HOST}/api/follows/requests/${requestId}/accept/`,
+        {
+          method: "POST",
+        }
+      );
+
+      let data = {};
 
       try {
-        setFollowRequestLoading(
-          notification.id
-        );
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
-        const response =
-          await authenticatedFetch(
-            `${BACKEND_HOST}/api/follows/requests/${requestId}/accept/`,
-            {
-              method: "POST",
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.detail ||
-            "Unable to accept follow request."
-          );
-        }
-
-        // Remove request from local request map
-        setFollowRequests(
-          (previous) => {
-            const updated = {
-              ...previous,
-            };
-
-            delete updated[actorId];
-
-            return updated;
-          }
-        );
-
-        // Change notification locally
-        setNotifications(
-          (previous) =>
-            previous.map(
-              (item) => {
-                if (
-                  item.id !==
-                  notification.id
-                ) {
-                  return item;
-                }
-
-                return {
-                  ...item,
-                  notification_type:
-                    "follow",
-                  message:
-                    `${notification?.actor_username || "User"} started following you.`,
-                  followAccepted:
-                    true,
-                };
-              }
-            )
-        );
-
-      } catch (error) {
-        console.error(
-          "Accept follow request error:",
-          error
-        );
-
-        alert(
-          error?.message ||
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          data?.error ||
           "Unable to accept follow request."
         );
-
-      } finally {
-        setFollowRequestLoading(null);
       }
-    };
+
+      // Remove request from local request map
+      setFollowRequests((previous) => {
+        const updated = {
+          ...previous,
+        };
+
+        delete updated[actorId];
+
+        return updated;
+      });
+
+      // Change notification locally
+      setNotifications((previous) =>
+        previous.map((item) => {
+          if (item.id !== notification.id) {
+            return item;
+          }
+
+          return {
+            ...item,
+            notification_type: "follow",
+            message: `${getActorUsername(
+              notification
+            )} started following you.`,
+            followAccepted: true,
+            isFollowingBack: false,
+            followBackRequested: false,
+          };
+        })
+      );
+    } catch (error) {
+      console.error(
+        "Accept follow request error:",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "Unable to accept follow request."
+      );
+    } finally {
+      setFollowRequestLoading(null);
+    }
+  };
 
   // ====================================================
   // DELETE / REJECT FOLLOW REQUEST
   // ====================================================
 
-  const handleRejectFollowRequest =
-    async (
-      notification
-    ) => {
-      const actorId =
-        getActorId(notification);
+  const handleRejectFollowRequest = async (
+    notification
+  ) => {
+    const actorId = getActorId(notification);
 
-      if (!actorId) {
-        return;
-      }
+    if (!actorId) {
+      alert(
+        "Unable to identify the user who sent this request."
+      );
+      return;
+    }
 
-      const requestId =
-        followRequests[actorId];
+    const requestId = followRequests[actorId];
 
-      if (!requestId) {
-        alert(
-          "Follow request not found. Please refresh notifications."
-        );
-        return;
-      }
+    if (!requestId) {
+      alert(
+        "Follow request not found. Please refresh notifications."
+      );
+      return;
+    }
+
+    try {
+      setFollowRequestLoading(notification.id);
+
+      const response = await authenticatedFetch(
+        `${BACKEND_HOST}/api/follows/requests/${requestId}/reject/`,
+        {
+          method: "POST",
+        }
+      );
+
+      let data = {};
 
       try {
-        setFollowRequestLoading(
-          notification.id
-        );
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
-        const response =
-          await authenticatedFetch(
-            `${BACKEND_HOST}/api/follows/requests/${requestId}/reject/`,
-            {
-              method: "POST",
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.detail ||
-            "Unable to reject follow request."
-          );
-        }
-
-        // Remove request locally
-        setFollowRequests(
-          (previous) => {
-            const updated = {
-              ...previous,
-            };
-
-            delete updated[actorId];
-
-            return updated;
-          }
-        );
-
-        // Remove notification from UI
-        setNotifications(
-          (previous) =>
-            previous.filter(
-              (item) =>
-                item.id !==
-                notification.id
-            )
-        );
-
-      } catch (error) {
-        console.error(
-          "Reject follow request error:",
-          error
-        );
-
-        alert(
-          error?.message ||
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          data?.error ||
           "Unable to reject follow request."
         );
-
-      } finally {
-        setFollowRequestLoading(null);
       }
-    };
+
+      // Remove request locally
+      setFollowRequests((previous) => {
+        const updated = {
+          ...previous,
+        };
+
+        delete updated[actorId];
+
+        return updated;
+      });
+
+      // Remove notification from UI
+      setNotifications((previous) =>
+        previous.filter(
+          (item) =>
+            item.id !== notification.id
+        )
+      );
+    } catch (error) {
+      console.error(
+        "Reject follow request error:",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "Unable to reject follow request."
+      );
+    } finally {
+      setFollowRequestLoading(null);
+    }
+  };
 
   // ====================================================
   // FOLLOW BACK
   // ====================================================
 
-  const handleFollowBack =
-    async (
-      notification
-    ) => {
-      const actorId =
-        getActorId(notification);
+  const handleFollowBack = async (
+    notification
+  ) => {
+    // ==================================================
+    // IMPORTANT DUPLICATE REQUEST PROTECTION
+    //
+    // DO NOT rely only on followBackLoading state.
+    // React state updates are asynchronous.
+    //
+    // useRef gives an immediate synchronous lock.
+    // ==================================================
 
-      if (!actorId) {
-        return;
+    if (followBackLock.current) {
+      console.log(
+        "Follow back already in progress. Ignoring duplicate click."
+      );
+
+      return;
+    }
+
+    const actorId = getActorId(notification);
+
+    console.log(
+      "FOLLOW BACK CLICKED",
+      {
+        notificationId: notification?.id,
+        actorId,
+        notification,
       }
+    );
+
+    if (!actorId) {
+      console.error(
+        "Follow back failed: actor ID not found.",
+        notification
+      );
+
+      alert(
+        "Unable to identify this user. Please refresh notifications."
+      );
+
+      return;
+    }
+
+    // ==================================================
+    // SET SYNCHRONOUS LOCK BEFORE API REQUEST
+    // ==================================================
+
+    followBackLock.current = true;
+
+    setFollowBackLoading(notification.id);
+
+    try {
+      const response = await authenticatedFetch(
+        `${BACKEND_HOST}/api/follows/${actorId}/`,
+        {
+          method: "POST",
+        }
+      );
+
+      let data = {};
 
       try {
-        setFollowBackLoading(
-          notification.id
-        );
+        data = await response.json();
+      } catch {
+        data = {};
+      }
 
-        const response =
-          await authenticatedFetch(
-            `${BACKEND_HOST}/api/follows/${actorId}/`,
-            {
-              method: "POST",
-            }
-          );
-
-        const data =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data?.detail ||
-            "Unable to follow back."
-          );
+      console.log(
+        "FOLLOW BACK RESPONSE",
+        {
+          status: response.status,
+          ok: response.ok,
+          data,
         }
+      );
 
-        // Update notification locally
-        setNotifications(
-          (previous) =>
-            previous.map(
-              (item) => {
-                if (
-                  item.id !==
-                  notification.id
-                ) {
-                  return item;
-                }
-
-                return {
-                  ...item,
-                  isFollowingBack:
-                    Boolean(
-                      data.following
-                    ),
-                  followBackRequested:
-                    Boolean(
-                      data.requested
-                    ),
-                };
-              }
-            )
-        );
-
-      } catch (error) {
-        console.error(
-          "Follow back error:",
-          error
-        );
-
-        alert(
-          error?.message ||
+      if (!response.ok) {
+        throw new Error(
+          data?.detail ||
+          data?.error ||
           "Unable to follow back."
         );
-
-      } finally {
-        setFollowBackLoading(null);
       }
-    };
+
+      const isFollowing = Boolean(
+        data?.following
+      );
+
+      const isRequested = Boolean(
+        data?.requested
+      );
+
+      // ==================================================
+      // UPDATE CURRENT NOTIFICATION
+      // ==================================================
+
+      setNotifications((previous) =>
+        previous.map((item) => {
+          if (item.id !== notification.id) {
+            return item;
+          }
+
+          return {
+            ...item,
+
+            isFollowingBack:
+              isFollowing,
+
+            followBackRequested:
+              isRequested,
+
+            // If backend says following,
+            // the follow-back is complete.
+            followAccepted:
+              isFollowing
+                ? true
+                : item.followAccepted,
+          };
+        })
+      );
+
+      // ==================================================
+      // PRIVATE ACCOUNT
+      //
+      // If backend creates a follow request,
+      // show "Requested".
+      // ==================================================
+
+      if (
+        isRequested &&
+        !isFollowing
+      ) {
+        setNotifications((previous) =>
+          previous.map((item) => {
+            if (item.id !== notification.id) {
+              return item;
+            }
+
+            return {
+              ...item,
+              isFollowingBack: false,
+              followBackRequested: true,
+            };
+          })
+        );
+      }
+
+      // ==================================================
+      // BACKGROUND REFRESH
+      // ==================================================
+
+      fetchFollowRequests().catch(
+        () => undefined
+      );
+    } catch (error) {
+      console.error(
+        "Follow back error:",
+        error
+      );
+
+      alert(
+        error?.message ||
+        "Unable to follow back."
+      );
+    } finally {
+      // ==================================================
+      // RELEASE SYNCHRONOUS LOCK
+      // ==================================================
+
+      followBackLock.current = false;
+
+      setFollowBackLoading(null);
+    }
+  };
 
   // ====================================================
-  // CHECK FOLLOW BUTTON
+  // CHECK FOLLOW BUTTON (Update this function)
   // ====================================================
 
-  const shouldShowFollowBack =
-    (item) => {
-      if (
-        item.notification_type !==
-        "follow"
-      ) {
-        return false;
-      }
+  const shouldShowFollowBack = (item) => {
+    if (item.notification_type !== "follow") {
+      return false;
+    }
 
-      if (
-        item.followAccepted
-      ) {
-        return true;
-      }
+    // Agar local state mein following hai
+    if (item.isFollowingBack) {
+      return false;
+    }
 
-      if (
-        item.isFollowingBack
-      ) {
-        return false;
-      }
+    // YEH LINE ADD KAREIN:
+    // Agar backend se aa raha hai ki user already follow kar raha hai
+    if (item.is_following_actor) {
+      return false;
+    }
 
-      if (
-        item.followBackRequested
-      ) {
-        return true;
-      }
-
-      return true;
-    };
+    return true;
+  };
 
   // ====================================================
   // LOADING
@@ -573,13 +633,11 @@ function NotificationsPage() {
   if (loading) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
-
         <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-black" />
 
         <p className="text-sm text-gray-500">
           Loading notifications...
         </p>
-
       </div>
     );
   }
@@ -591,7 +649,6 @@ function NotificationsPage() {
   if (error) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
-
         <div className="mb-3 text-4xl">
           ⚠️
         </div>
@@ -599,7 +656,6 @@ function NotificationsPage() {
         <p className="text-red-500">
           {error}
         </p>
-
       </div>
     );
   }
@@ -616,7 +672,6 @@ function NotificationsPage() {
       ================================================== */}
 
       <div className="mb-6">
-
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">
           Notifications
         </h1>
@@ -624,7 +679,6 @@ function NotificationsPage() {
         <p className="mt-1 text-sm text-gray-500">
           Stay updated with your activity
         </p>
-
       </div>
 
       {/* ==================================================
@@ -632,9 +686,7 @@ function NotificationsPage() {
       ================================================== */}
 
       {notifications.length === 0 ? (
-
         <div className="rounded-3xl border border-gray-200 bg-white px-6 py-14 text-center shadow-sm">
-
           <div className="mb-4 text-5xl">
             🔔
           </div>
@@ -644,212 +696,202 @@ function NotificationsPage() {
           </h2>
 
           <p className="mt-1 text-sm text-gray-500">
-            Your likes, follows, comments and story activity will appear here.
+            Your likes, follows, comments and
+            story activity will appear here.
           </p>
-
         </div>
-
       ) : (
-
         <div className="space-y-2">
 
-          {notifications.map(
-            (item) => {
+          {notifications.map((item) => {
+            const actorId =
+              getActorId(item);
 
-              const actorId =
-                getActorId(item);
+            const isFollowRequest =
+              item.notification_type ===
+              "follow_request";
 
-              const isFollowRequest =
-                item.notification_type ===
-                "follow_request";
+            const isFollow =
+              item.notification_type ===
+              "follow";
 
-              const isFollow =
-                item.notification_type ===
-                "follow";
-
-              const requestId =
+            const requestId =
+              actorId
+                ? followRequests[
                 actorId
-                  ? followRequests[
-                      actorId
-                    ]
-                  : null;
+                ]
+                : null;
 
-              const requestLoading =
-                followRequestLoading ===
-                item.id;
+            const requestLoading =
+              followRequestLoading ===
+              item.id;
 
-              const followBackLoadingThis =
-                followBackLoading ===
-                item.id;
+            const followBackLoadingThis =
+              followBackLoading ===
+              item.id;
 
-              return (
-                <div
-                  key={item.id}
-                  className={`group rounded-2xl border p-4 transition ${
-                    item.is_read
-                      ? "border-gray-100 bg-white"
-                      : "border-blue-100 bg-blue-50/50"
+            return (
+              <div
+                key={item.id}
+                className={`group rounded-2xl border p-4 transition ${item.is_read
+                    ? "border-gray-100 bg-white"
+                    : "border-blue-100 bg-blue-50/50"
                   } hover:shadow-sm`}
-                >
+              >
 
-                  {/* ==================================================
-                      TOP ROW
-                  ================================================== */}
+                {/* ==================================================
+                    TOP ROW
+                ================================================== */}
 
-                  <div className="flex items-start gap-4">
+                <div className="flex items-start gap-4">
 
-                    {/* ICON */}
+                  {/* ICON */}
 
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl ${
-                        item.notification_type ===
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-xl ${item.notification_type ===
                         "story"
-                          ? "bg-pink-100"
-                          : item.notification_type ===
-                            "message"
+                        ? "bg-pink-100"
+                        : item.notification_type ===
+                          "message"
                           ? "bg-purple-100"
                           : item.notification_type ===
                             "follow" ||
                             item.notification_type ===
                             "follow_request"
-                          ? "bg-blue-100"
-                          : "bg-gray-100"
+                            ? "bg-blue-100"
+                            : "bg-gray-100"
                       }`}
-                    >
-                      {getNotificationIcon(
+                  >
+                    {getNotificationIcon(
+                      item
+                    )}
+                  </div>
+
+                  {/* CONTENT */}
+
+                  <div className="min-w-0 flex-1">
+
+                    <div className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
+                      {getNotificationLabel(
                         item
                       )}
                     </div>
 
-                    {/* CONTENT */}
+                    <p className="break-words text-sm leading-5 text-gray-800">
+                      {item.message}
+                    </p>
 
-                    <div className="min-w-0 flex-1">
-
-                      <div className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                        {getNotificationLabel(
-                          item
-                        )}
-                      </div>
-
-                      <p className="break-words text-sm leading-5 text-gray-800">
-                        {item.message}
-                      </p>
-
-                      <p className="mt-1 text-xs text-gray-400">
-                        {new Date(
-                          item.created_at
-                        ).toLocaleString()}
-                      </p>
-
-                    </div>
-
-                    {/* UNREAD DOT */}
-
-                    {!item.is_read && (
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500" />
-                    )}
+                    <p className="mt-1 text-xs text-gray-400">
+                      {new Date(
+                        item.created_at
+                      ).toLocaleString()}
+                    </p>
 
                   </div>
 
-                  {/* ==================================================
-                      FOLLOW REQUEST ACTIONS
-                  ================================================== */}
+                  {/* UNREAD DOT */}
 
-                  {isFollowRequest &&
-                    requestId && (
-                      <div className="mt-4 flex gap-2 pl-16">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleAcceptFollowRequest(
-                              item
-                            )
-                          }
-                          disabled={
-                            requestLoading
-                          }
-                          className="rounded-lg bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {requestLoading
-                            ? "..."
-                            : "Confirm"}
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleRejectFollowRequest(
-                              item
-                            )
-                          }
-                          disabled={
-                            requestLoading
-                          }
-                          className="rounded-lg bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Delete
-                        </button>
-
-                      </div>
-                    )}
-
-                  {/* ==================================================
-                      FOLLOW BACK
-                  ================================================== */}
-
-                  {isFollow &&
-                    shouldShowFollowBack(
-                      item
-                    ) &&
-                    !item.isFollowingBack && (
-                      <div className="mt-4 pl-16">
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleFollowBack(
-                              item
-                            )
-                          }
-                          disabled={
-                            followBackLoadingThis ||
-                            item.followBackRequested
-                          }
-                          className="rounded-lg bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          {followBackLoadingThis
-                            ? "..."
-                            : item.followBackRequested
-                            ? "Requested"
-                            : "Follow back"}
-                        </button>
-
-                      </div>
-                    )}
-
-                  {/* ==================================================
-                      FOLLOW BACK SUCCESS
-                  ================================================== */}
-
-                  {isFollow &&
-                    item.isFollowingBack && (
-                      <div className="mt-4 pl-16">
-
-                        <span className="inline-flex rounded-lg bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700">
-                          Following
-                        </span>
-
-                      </div>
-                    )}
+                  {!item.is_read && (
+                    <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-blue-500" />
+                  )}
 
                 </div>
-              );
-            }
-          )}
+
+                {/* ==================================================
+                    FOLLOW REQUEST ACTIONS
+                ================================================== */}
+
+                {isFollowRequest &&
+                  requestId && (
+                    <div className="mt-4 flex gap-2 pl-16">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleAcceptFollowRequest(
+                            item
+                          )
+                        }
+                        disabled={
+                          requestLoading
+                        }
+                        className="rounded-lg bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {requestLoading
+                          ? "..."
+                          : "Confirm"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRejectFollowRequest(
+                            item
+                          )
+                        }
+                        disabled={
+                          requestLoading
+                        }
+                        className="rounded-lg bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Delete
+                      </button>
+
+                    </div>
+                  )}
+
+                {/* ==================================================
+                    FOLLOW BACK
+                ================================================== */}
+
+                {isFollow &&
+                  shouldShowFollowBack(
+                    item
+                  ) &&
+                  !item.isFollowingBack && (
+                    <div className="mt-4 pl-16">
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleFollowBack(
+                            item
+                          )
+                        }
+                        disabled={
+                          followBackLoadingThis ||
+                          item.followBackRequested ||
+                          followBackLock.current
+                        }
+                        className="rounded-lg bg-blue-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {followBackLoadingThis
+                          ? "..."
+                          : item.followBackRequested
+                            ? "Requested"
+                            : "Follow back"}
+                      </button>
+
+                    </div>
+                  )}
+
+                {/* ==================================================
+                    FOLLOW BACK SUCCESS
+                ================================================== */}
+
+                {isFollow && (item.isFollowingBack || item.is_following_actor) && (
+                  <div className="mt-4 pl-16">
+                    <span className="inline-flex rounded-lg bg-gray-100 px-5 py-2 text-sm font-semibold text-gray-700">
+                      Following
+                    </span>
+                  </div>
+                )}
+
+              </div>
+            );
+          })}
 
         </div>
-
       )}
 
     </div>

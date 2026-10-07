@@ -495,39 +495,88 @@ class FollowRequestListView(APIView):
 # =====================================================
 # ACCEPT FOLLOW REQUEST
 # =====================================================
-
 class AcceptFollowRequestView(APIView):
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, request_id):
 
         try:
-
-            follow_request = (
-                FollowRequest.objects
-                .select_related(
-                    "sender",
-                    "receiver"
-                )
-                .get(
-                    id=request_id,
-                    receiver=request.user
-                )
+            follow_request = FollowRequest.objects.select_related(
+                "sender", "receiver"
+            ).get(
+                id=request_id,
+                receiver=request.user
             )
-
         except FollowRequest.DoesNotExist:
-
             return Response(
-                {
-                    "detail": "Follow request not found."
-                },
+                {"detail": "Follow request not found."},
                 status=404
             )
 
         sender = follow_request.sender
+
+        # =================================================
+        # FIX: UPDATE THE EXISTING NOTIFICATION
+        # Purani "follow_request" notification ko "follow" mein badal do
+        # taaki frontend refresh hone par bhi sahi dikhe.
+        # =================================================
+        Notification.objects.filter(
+            recipient=request.user,
+            actor=sender,
+            notification_type="follow_request"
+        ).update(
+            notification_type="follow",
+            message=f"{sender.username} started following you."
+        )
+
+        # =================================================
+        # CREATE ACCEPTED FOLLOW (if not exists)
+        # =================================================
+        existing_follow = Follow.objects.filter(
+            follower=sender,
+            following=request.user
+        ).exists()
+
+        if not existing_follow:
+            Follow.objects.create(
+                follower=sender,
+                following=request.user
+            )
+
+            Profile.objects.filter(user=request.user).update(
+                followers_count=F("followers_count") + 1
+            )
+            Profile.objects.filter(user=sender).update(
+                following_count=F("following_count") + 1
+            )
+
+        # =================================================
+        # DELETE PENDING REQUEST
+        # =================================================
+        follow_request.delete()
+
+        # =================================================
+        # NOTIFY THE SENDER (Optional but good UX)
+        # =================================================
+        message = f"{request.user.username} accepted your follow request."
+        send_notification(
+            recipient=sender,
+            actor=request.user,
+            notification_type="follow_request_accepted",
+            message=message
+        )
+
+        profile = Profile.objects.get(user=request.user)
+
+        return Response(
+            {
+                "success": True,
+                "following": True,
+                "requested": False,
+                "followers_count": profile.followers_count,
+            }
+        )
 
         # =================================================
         # CHECK IF ALREADY FOLLOWING
@@ -614,32 +663,37 @@ class AcceptFollowRequestView(APIView):
 
 class RejectFollowRequestView(APIView):
 
-    permission_classes = [
-        IsAuthenticated
-    ]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, request_id):
 
-        deleted, _ = (
-            FollowRequest.objects
-            .filter(
+        try:
+            # Sender ko pehle fetch karo taaki notification delete kar sako
+            follow_request = FollowRequest.objects.select_related("sender").get(
                 id=request_id,
                 receiver=request.user
             )
-            .delete()
-        )
-
-        if deleted == 0:
-
+        except FollowRequest.DoesNotExist:
             return Response(
-                {
-                    "detail": "Follow request not found."
-                },
+                {"detail": "Follow request not found."},
                 status=404
             )
 
-        return Response(
-            {
-                "success": True
-            }
-        )
+        sender = follow_request.sender
+
+        # =================================================
+        # FIX: DELETE THE ASSOCIATED NOTIFICATION
+        # Request reject hone par notification bhi gayab honi chahiye
+        # =================================================
+        Notification.objects.filter(
+            recipient=request.user,
+            actor=sender,
+            notification_type="follow_request"
+        ).delete()
+
+        # =================================================
+        # DELETE PENDING REQUEST
+        # =================================================
+        follow_request.delete()
+
+        return Response({"success": True})

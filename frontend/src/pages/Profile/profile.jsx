@@ -51,6 +51,11 @@ const Profile = () => {
   const [followRequestPending, setFollowRequestPending] =
     useState(false);
 
+  // Prevent duplicate follow/unfollow requests while the
+  // previous request is still being processed.
+  const [followActionLoading, setFollowActionLoading] =
+    useState(false);
+
   const [followers, setFollowers] = useState(0);
 
   // ==================================================
@@ -383,11 +388,15 @@ const Profile = () => {
   // ==================================================
 
   const handleFollow = async () => {
-    if (!user) {
+    // Do not allow another request while the current
+    // follow/unfollow action is still in progress.
+    if (!user || followActionLoading) {
       return;
     }
 
     try {
+      setFollowActionLoading(true);
+
       const userId =
         user.user_id || user.id;
 
@@ -438,6 +447,8 @@ const Profile = () => {
       alert(
         "Unable to update follow status."
       );
+    } finally {
+      setFollowActionLoading(false);
     }
   };
 
@@ -1122,16 +1133,22 @@ const Profile = () => {
                   </button>
                 ) : (
                   <button
+                    type="button"
                     onClick={handleFollow}
+                    disabled={followActionLoading}
                     className={`px-5 py-2 rounded-lg font-medium ${
-                      isFollowing
+                      followActionLoading
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : isFollowing
                         ? "bg-gray-100 text-gray-900 hover:bg-gray-200"
                         : followRequestPending
                         ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                         : "bg-blue-500 text-white hover:bg-blue-600"
                     }`}
                   >
-                    {isFollowing
+                    {followActionLoading
+                      ? "Please wait..."
+                      : isFollowing
                       ? "Following"
                       : followRequestPending
                       ? "Requested"

@@ -1,25 +1,30 @@
-# React
-frontend/node_modules/
-frontend/dist/
-
-# Python
-backend/venv/
-**/__pycache__/
-*.py[cod]
-
-# Database
-*.sqlite3
-
-# Media / uploaded files
-backend/hlo/media/
-
 # Environment
 .env
-*.env
 
-# VS Code
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+db.sqlite3
+
+# Media / uploaded files
+media/
+
+# Static
+staticfiles/
+
+# Virtual environment
+venv/
+env/
+
+# IDE
 .vscode/
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
+
+backend/hlo/local_data.json

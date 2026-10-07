@@ -176,6 +176,15 @@ class Attachment(models.Model):
 
     def url(self):
         try:
+            # Voice messages are stored on Cloudinary as video resources.
+            # MediaCloudinaryStorage may otherwise generate an image URL.
+            if (
+                self.content_type == "audio/webm"
+                and self.message
+                and self.message.attachment_url
+            ):
+                return self.message.attachment_url
+
             return self.file.url
         except Exception:
             return None

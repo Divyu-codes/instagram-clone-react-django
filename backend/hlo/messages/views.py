@@ -7,6 +7,8 @@ from follows.models import Follow
 
 from .models import Message, Attachment
 
+import cloudinary.uploader
+
 
 # ==========================================
 # CHECK CHAT PERMISSION
@@ -176,6 +178,14 @@ class RoomMessagesView(APIView):
 def upload_attachment(request):
     """
     Upload a chat attachment.
+
+    Images:
+        Continue using Django + Cloudinary storage.
+
+    Voice recordings (.webm):
+        Upload directly to Cloudinary as a video resource
+        because Cloudinary stores WebM audio files using
+        the video resource type.
     """
 
     file = request.FILES.get("file")
@@ -188,9 +198,73 @@ def upload_attachment(request):
             status=400
         )
 
+    content_type = file.content_type or ""
+
+    # ==========================================
+    # VOICE RECORDING
+    # ==========================================
+    #
+    # Browser MediaRecorder normally sends:
+    #
+    # audio/webm
+    #
+    # MediaCloudinaryStorage's normal upload()
+    # treats the file as an image, causing:
+    #
+    # cloudinary.exceptions.BadRequest:
+    # Invalid image file
+    #
+    # So upload WebM directly as resource_type="video".
+    # ==========================================
+
+    if content_type == "audio/webm" or file.name.lower().endswith(".webm"):
+
+        try:
+            result = cloudinary.uploader.upload(
+                file,
+                folder="instagram_clone/chat_uploads",
+                resource_type="video",
+                format="webm",
+            )
+
+        except Exception as e:
+            return Response(
+                {
+                    "error": "Voice upload failed.",
+                    "details": str(e),
+                },
+                status=500
+            )
+
+        # ------------------------------------------
+        # Store Cloudinary public_id in FileField.
+        #
+        # Passing a string here prevents Django from
+        # trying to upload the WebM file again through
+        # MediaCloudinaryStorage.
+        # ------------------------------------------
+
+        attachment = Attachment.objects.create(
+            file=result["public_id"],
+            content_type=content_type,
+        )
+
+        return Response({
+            "id": attachment.id,
+            "url": result["secure_url"],
+            "content_type": content_type,
+        })
+
+    # ==========================================
+    # NORMAL IMAGE / OTHER FILE
+    # ==========================================
+    #
+    # Keep existing behavior unchanged.
+    # ==========================================
+
     attachment = Attachment.objects.create(
         file=file,
-        content_type=file.content_type or ""
+        content_type=content_type
     )
 
     return Response({
