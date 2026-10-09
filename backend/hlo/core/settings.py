@@ -29,18 +29,20 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
+MY_VERCEL_URL = "https://instagram-clone-project-gamma.vercel.app"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Local React
-    "https://aapki-frontend-url.vercel.app", # Deployed React
+    MY_VERCEL_URL # Deployed React
 ]
 
-
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+    MY_VERCEL_URL,
+]
 # Application definition
-
 INSTALLED_APPS = [
     "daphne",
     "cloudinary_storage",
-
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
