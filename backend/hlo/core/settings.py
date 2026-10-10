@@ -34,6 +34,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Local React
     MY_VERCEL_URL # Deployed React
 ]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
