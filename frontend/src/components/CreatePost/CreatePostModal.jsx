@@ -120,7 +120,7 @@ function CreatePostModal({ onClose, onPostCreated }) {
       // =========================
 
       const response = await authenticatedFetch(
-        "http://127.0.0.1:8000/api/posts/",
+        "/api/posts/",
         {
           method: "POST",
           body: formData,
