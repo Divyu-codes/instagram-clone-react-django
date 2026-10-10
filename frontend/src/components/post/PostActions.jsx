@@ -13,7 +13,7 @@ function PostActions({ postId, likes, onCommentToggle, onShare }) {
 
     try {
       setLoading(true);
-      const response = await authenticatedFetch(`http://127.0.0.1:8000/api/likes/${postId}/`, {
+      const response = await authenticatedFetch(`https://instagram-clone-react-django.onrender.com/api/likes/${postId}/`, {
         method: "POST",
       });
 

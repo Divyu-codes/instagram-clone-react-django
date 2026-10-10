@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const BACKEND_HOST = "http://127.0.0.1:8000";
+const BACKEND_HOST = "https://instagram-clone-react-django.onrender.com";
 
 function getMediaUrl(url) {
   if (!url) return "https://images.unsplash.com/photo-1517849845537-4d257902454a?auto=format&fit=crop&w=400&q=80";

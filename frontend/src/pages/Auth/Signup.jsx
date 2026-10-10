@@ -50,7 +50,7 @@ function Signup() {
 
         setLoading(true);
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/users/register/", {
+            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/register/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -82,7 +82,7 @@ function Signup() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch("http://127.0.0.1:8000/api/users/verify-email/", {
+            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/verify-email/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

@@ -8,7 +8,7 @@ function ResetPassword() {
   const [message, setMessage] = useState("");
   const submit = async (e) => {
     e.preventDefault();
-    const response = await fetch(`http://127.0.0.1:8000/api/users/password/reset/${uid}/${token}/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
+    const response = await fetch(`https://instagram-clone-react-django.onrender.com/api/users/password/reset/${uid}/${token}/`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
     const data = await response.json();
     setMessage(data.detail || "Request failed.");
     if (response.ok) setTimeout(() => navigate("/login"), 1200);

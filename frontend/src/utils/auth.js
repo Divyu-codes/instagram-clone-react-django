@@ -1,4 +1,4 @@
-const API_URL = "https://instagram-clone-react-django.onrender.com";
+const API_URL = "https://instagram-clone-react-django.onrender.com/api";
 
 let refreshRequest = null;
 
@@ -62,7 +62,7 @@ export async function refreshAccessToken() {
   if (!refresh) return null;
 
   refreshRequest = fetch(
-    `${API_URL}/api/token/refresh/`,
+    `${API_URL}/token/refresh/`,
     {
       method: "POST",
       headers: {
@@ -202,7 +202,7 @@ export async function logout() {
   try {
     if (refresh && access) {
       await fetch(
-        `${API_URL}/api/users/logout/`,
+        `${API_URL}/users/logout/`,
         {
           method: "POST",
           headers: {

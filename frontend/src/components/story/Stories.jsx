@@ -7,7 +7,7 @@ import {
 } from "../../utils/auth";
 
 const BACKEND_HOST =
-  "http://127.0.0.1:8000";
+  "https://instagram-clone-react-django.onrender.com";
 
 // ==========================================
 // GET CURRENT USER ID

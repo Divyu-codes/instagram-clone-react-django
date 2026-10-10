@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { authenticatedFetch } from "../../utils/auth";
 
-const BACKEND_HOST = "http://127.0.0.1:8000";
+const BACKEND_HOST = "https://instagram-clone-react-django.onrender.com";
 
 function CreateStory({
   onStoryCreated,

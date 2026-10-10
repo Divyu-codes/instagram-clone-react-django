@@ -19,7 +19,7 @@ function CommentSection({ postId, onCommentAdded }) {
       setError("");
 
       const response = await authenticatedFetch(
-        `http://127.0.0.1:8000/api/comments/${postId}/`
+        `https://instagram-clone-react-django.onrender.com/api/comments/${postId}/`
       );
 
       const data = await response.json();
@@ -69,7 +69,7 @@ function CommentSection({ postId, onCommentAdded }) {
       setError("");
 
       const response = await authenticatedFetch(
-        `http://127.0.0.1:8000/api/comments/${postId}/`,
+        `https://instagram-clone-react-django.onrender.com/api/comments/${postId}/`,
         {
           method: "POST",
           headers: {

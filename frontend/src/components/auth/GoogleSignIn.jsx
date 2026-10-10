@@ -12,7 +12,7 @@ export default function GoogleSignIn() {
     const name = window.prompt("Display name (optional):") || "";
     setLoading(true);
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/users/google/", {
+      const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/google/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim().toLowerCase(), name }),

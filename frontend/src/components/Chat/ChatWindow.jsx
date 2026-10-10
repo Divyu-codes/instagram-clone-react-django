@@ -24,7 +24,7 @@ const BACKEND_HOST =
 
         window.__BACKEND_HOST__) ||
 
-    "http://127.0.0.1:8000";
+    "https://instagram-clone-react-django.onrender.com";
 
 
 

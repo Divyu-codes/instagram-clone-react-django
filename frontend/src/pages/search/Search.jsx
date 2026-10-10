@@ -14,7 +14,7 @@ function Search() {
         setLoading(true);
 
         const response = await authenticatedFetch(
-          "http://127.0.0.1:8000/api/users/"
+          "https://instagram-clone-react-django.onrender.com/api/users/"
         );
 
         if (!response.ok) {

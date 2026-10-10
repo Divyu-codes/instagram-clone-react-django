@@ -1,4 +1,4 @@
-const BACKEND_HOST = import.meta.env.VITE_BACKEND_URL || "http://127.0.0.1:8000";
+const BACKEND_HOST = import.meta.env.VITE_BACKEND_URL || "https://instagram-clone-react-django.onrender.com";
 
 function getMediaUrl(url) {
   if (!url) return "";

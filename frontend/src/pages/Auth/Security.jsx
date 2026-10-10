@@ -2,7 +2,7 @@ import { useState } from "react";
 import { authenticatedFetch } from "../../utils/auth";
 import { FaInstagram, FaLock, FaEnvelope, FaShieldAlt } from "react-icons/fa";
 
-const API = "http://127.0.0.1:8000/api/users";
+const API = "https://instagram-clone-react-django.onrender.com/api/users";
 
 function Security() {
   const [message, setMessage] = useState("");
