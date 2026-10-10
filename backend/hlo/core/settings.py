@@ -29,7 +29,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
-MY_VERCEL_URL = "https://instagram-clone-project-gamma.vercel.app"
+MY_VERCEL_URL = "https://instagram-clone-react-django.vercel.app"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Local React
     MY_VERCEL_URL # Deployed React
