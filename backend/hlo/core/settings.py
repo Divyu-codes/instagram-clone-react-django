@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 
 CORS_ALLOW_ALL_ORIGINS = True 
 
+
 MY_VERCEL_URL = "https://instagram-clone-react-django.vercel.app"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173", # Local React
@@ -55,9 +56,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Third-party apps
+    "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
-    "corsheaders",
     #our apps
     "accounts",
     "stories",
