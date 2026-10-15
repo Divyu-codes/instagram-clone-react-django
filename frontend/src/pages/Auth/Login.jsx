@@ -3,6 +3,42 @@ import { useNavigate } from "react-router-dom";
 import { FaInstagram } from "react-icons/fa";
 import GoogleSignIn from "../../components/auth/GoogleSignIn";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://instagram-clone-react-django.onrender.com/api";
+
+const getApiErrorMessage = (data, fallback) => {
+    if (typeof data?.detail === "string" && data.detail.trim()) {
+        return data.detail;
+    }
+
+    if (typeof data?.error === "string" && data.error.trim()) {
+        return data.error;
+    }
+
+    for (const value of Object.values(data || {})) {
+        if (Array.isArray(value) && value.length) {
+            const first = value[0];
+            if (typeof first === "string" && first.trim()) return first;
+        }
+
+        if (typeof value === "string" && value.trim()) {
+            return value;
+        }
+    }
+
+    return fallback;
+};
+
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 15000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+        clearTimeout(timeoutId);
+    }
+};
+
 function Login() {
     const navigate = useNavigate();
     const [username, setUsername] = useState("");
@@ -16,15 +52,20 @@ function Login() {
 
     async function requestPasswordReset() {
         try {
-            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/password/forgot/", {
+            const response = await fetchWithTimeout(`${API_URL}/users/password/forgot/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email: recoveryEmail }),
             });
             const data = await response.json();
-            setRecoveryMessage(data.detail || "Please check your email.");
-        } catch {
-            setRecoveryMessage("Could not send the reset request. Try again.");
+            setRecoveryMessage(response.ok ? (data.detail || "Please check your email.") : getApiErrorMessage(data, "Please check your email."));
+        } catch (requestError) {
+            console.error(requestError);
+            if (requestError?.name === "AbortError") {
+                setRecoveryMessage("Request timed out. The server is busy, please try again.");
+                return;
+            }
+            setRecoveryMessage("Network error. The server might be waking up from sleep. Please wait a minute and try again.");
         }
     }
 
@@ -33,7 +74,7 @@ function Login() {
         setError("");
 
         try {
-            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/token/", {
+            const response = await fetchWithTimeout(`${API_URL}/token/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username, password, ...(requiresOtp ? { otp } : {}) }),
@@ -41,8 +82,9 @@ function Login() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.detail || "Invalid username or password.");
-                if ((data.detail || "").toLowerCase().includes("two-factor authentication code is required")) {
+                const backendError = getApiErrorMessage(data, "Invalid username or password.");
+                setError(backendError);
+                if ((backendError || "").toLowerCase().includes("two-factor authentication code is required")) {
                     setRequiresOtp(true);
                 }
                 return;
@@ -54,7 +96,11 @@ function Login() {
             navigate("/");
         } catch (requestError) {
             console.error("Login Error:", requestError);
-            setError("Could not connect to the server. Please try again.");
+            if (requestError?.name === "AbortError") {
+                setError("Request timed out. The server is busy, please try again.");
+                return;
+            }
+            setError("Network error. The server might be waking up from sleep. Please wait a minute and try again.");
         }
     }
 

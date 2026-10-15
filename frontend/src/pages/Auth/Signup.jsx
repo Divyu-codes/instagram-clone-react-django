@@ -2,6 +2,42 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaInstagram } from "react-icons/fa";
 
+const API_URL = import.meta.env.VITE_API_URL || "https://instagram-clone-react-django.onrender.com/api";
+
+const getApiErrorMessage = (data, fallback) => {
+    if (typeof data?.detail === "string" && data.detail.trim()) {
+        return data.detail;
+    }
+
+    if (typeof data?.error === "string" && data.error.trim()) {
+        return data.error;
+    }
+
+    for (const value of Object.values(data || {})) {
+        if (Array.isArray(value) && value.length) {
+            const first = value[0];
+            if (typeof first === "string" && first.trim()) return first;
+        }
+
+        if (typeof value === "string" && value.trim()) {
+            return value;
+        }
+    }
+
+    return fallback;
+};
+
+const fetchWithTimeout = async (url, options = {}, timeoutMs = 15000) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        return await fetch(url, { ...options, signal: controller.signal });
+    } finally {
+        clearTimeout(timeoutId);
+    }
+};
+
 function Signup() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -50,7 +86,7 @@ function Signup() {
 
         setLoading(true);
         try {
-            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/register/", {
+            const response = await fetchWithTimeout(`${API_URL}/users/register/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -65,14 +101,19 @@ function Signup() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.detail || Object.values(data)[0]?.[0] || "Signup failed");
+                setError(getApiErrorMessage(data, "Signup failed"));
                 return;
             }
 
             setVerifyEmail(true);
             setFormData((prev) => ({ ...prev, password: "", confirmPassword: "" }));
         } catch (err) {
-            setError("Connection error. Please try again.");
+            console.error(err);
+            if (err?.name === "AbortError") {
+                setError("Request timed out. The server is busy, please try again.");
+                return;
+            }
+            setError("Network error. The server might be waking up from sleep. Please wait a minute and try again.");
         } finally {
             setLoading(false);
         }
@@ -82,7 +123,7 @@ function Signup() {
         e.preventDefault();
         setLoading(true);
         try {
-            const response = await fetch("https://instagram-clone-react-django.onrender.com/api/users/verify-email/", {
+            const response = await fetchWithTimeout(`${API_URL}/users/verify-email/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -93,14 +134,19 @@ function Signup() {
             const data = await response.json();
 
             if (!response.ok) {
-                setError(data.detail || "Verification failed");
+                setError(getApiErrorMessage(data, "Verification failed"));
                 return;
             }
 
             alert("Email verified! You can now log in.");
             navigate("/login");
         } catch (err) {
-            setError("Verification error. Please try again.");
+            console.error(err);
+            if (err?.name === "AbortError") {
+                setError("Request timed out. The server is busy, please try again.");
+                return;
+            }
+            setError("Network error. The server might be waking up from sleep. Please wait a minute and try again.");
         } finally {
             setLoading(false);
         }

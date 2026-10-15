@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Home from "./pages/Home/home";
 import Login from "./pages/Auth/Login";
@@ -30,6 +30,9 @@ function AuthenticatedLayout({ children }) {
 }
 
 function App() {
+  const hasAccessToken = () =>
+    typeof window !== "undefined" && Boolean(window.localStorage.getItem("access_token"));
+
   const protectedPage = (page) => (
     <ProtectedRoute>
       <AuthenticatedLayout>{page}</AuthenticatedLayout>
@@ -41,9 +44,9 @@ function App() {
       <Notification />
 
       <Routes>
-        <Route path="/" element={protectedPage(<Home />)} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/" element={hasAccessToken() ? protectedPage(<Home />) : <Navigate to="/login" replace />} />
+        <Route path="/login" element={hasAccessToken() ? <Navigate to="/" replace /> : <Login />} />
+        <Route path="/signup" element={hasAccessToken() ? <Navigate to="/" replace /> : <Signup />} />
         <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
         <Route path="/verify-email/:token" element={<VerifyEmail />} />
         <Route path="/security" element={protectedPage(<Security />)} />

@@ -54,7 +54,9 @@ function Notification() {
       window.addEventListener("pointerdown", enableSound, { once: true });
       window.addEventListener("keydown", enableSound, { once: true });
 
-      const socket = new WebSocket(`ws://127.0.0.1:8000/ws/notifications/?token=${token}`);
+      const apiBase = (import.meta.env.VITE_API_URL || "https://instagram-clone-react-django.onrender.com/api").replace(/\/api$/, "");
+      const wsBase = apiBase.replace(/^http:/, "ws:").replace(/^https:/, "wss:");
+      const socket = new WebSocket(`${wsBase}/ws/notifications/?token=${token}`);
       socket.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
