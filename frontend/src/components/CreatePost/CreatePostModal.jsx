@@ -119,14 +119,20 @@ function CreatePostModal({ onClose, onPostCreated }) {
       // API REQUEST
       // =========================
 
-      const response = await authenticatedFetch(
-        "/api/posts/",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+            // =========================
+      // API REQUEST (FIXED)
+      // =========================
 
+      const token = localStorage.getItem("access_token");
+
+      
+      const response = await fetch("https://instagram-clone-react-django.onrender.com/api/posts/", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       // =========================
       // RESPONSE
