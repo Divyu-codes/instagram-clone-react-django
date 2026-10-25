@@ -528,7 +528,7 @@ export default function MessageInput({
 
 
     // =====================================================
-    // UI
+    // UI (PIKACHAT THEME APPLIED ⚡)
     // =====================================================
 
     return (
@@ -638,7 +638,7 @@ export default function MessageInput({
                             ? "Recording..."
                             : uploading
                             ? "Uploading..."
-                            : "Message..."
+                            : "Spark a message... ⚡"
                     }
                     style={
                         styles.input
@@ -686,7 +686,7 @@ export default function MessageInput({
             )}
 
 
-            {/* SEND */}
+            {/* SEND (LIGHTNING BOLT) */}
 
             <button
                 type="button"
@@ -707,8 +707,9 @@ export default function MessageInput({
                             ? 0.45
                             : 1,
                 }}
+                title="Send Message"
             >
-                ➤
+                ⚡
             </button>
 
         </div>
@@ -717,7 +718,7 @@ export default function MessageInput({
 
 
 // =====================================================
-// STYLES
+// STYLES (PIKACHAT COLORS ⚡)
 // =====================================================
 
 const styles = {
@@ -727,9 +728,8 @@ const styles = {
         alignItems: "center",
         gap: "7px",
         padding: "11px 14px",
-        borderTop:
-            "1px solid #e5e7eb",
-        background: "#fff",
+        borderTop: "1px solid #fde047",
+        background: "#FFFEF0", // Warm yellow background
     },
 
     inputWrapper: {
@@ -740,14 +740,12 @@ const styles = {
         width: "100%",
         height: "42px",
         boxSizing: "border-box",
-        border:
-            "1px solid #d1d5db",
+        border: "1px solid #fde047", // Yellow border
         borderRadius: "22px",
-        padding:
-            "0 16px",
+        padding: "0 16px",
         outline: "none",
         fontSize: "14px",
-        background: "#f9fafb",
+        background: "#FFFDE7", // Light yellow input
     },
 
     iconButton: {
@@ -755,13 +753,14 @@ const styles = {
         height: "40px",
         border: "none",
         borderRadius: "50%",
-        background: "#f3f4f6",
+        background: "#FFF9C4", // Light yellow icon buttons
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
         fontSize: "19px",
         flexShrink: 0,
+        transition: "background 0.2s",
     },
 
     stopButton: {
@@ -784,14 +783,15 @@ const styles = {
         height: "42px",
         border: "none",
         borderRadius: "50%",
-        background: "#3797f0",
-        color: "#fff",
+        background: "#FFCB05", // Pikachu Yellow!
+        color: "#111827", // Dark text for contrast
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
-        fontSize: "19px",
+        fontSize: "20px",
         flexShrink: 0,
+        transition: "background 0.2s",
     },
 
     hiddenInput: {
