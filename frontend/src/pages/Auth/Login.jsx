@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaInstagram } from "react-icons/fa";
 import GoogleSignIn from "../../components/auth/GoogleSignIn";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://instagram-clone-react-django.onrender.com/api";
@@ -104,14 +103,22 @@ function Login() {
         }
     }
 
+    // =====================================================
+    // PIKACHAT THEME CLASSES
+    // =====================================================
+    const inputClasses = "w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-[#FFCB05] focus:ring-2 focus:ring-yellow-100 transition-all";
+    const buttonClasses = "w-full rounded-lg bg-[#FFCB05] p-3 font-bold text-gray-900 hover:bg-[#e6b800] transition-colors disabled:opacity-50";
+    const linkClasses = "font-semibold text-yellow-600 hover:text-yellow-700 transition-colors";
+
     return (
-        <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 px-4 py-10 flex items-center justify-center">
+        <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-[#FFFEF0] to-amber-50 px-4 py-10 flex items-center justify-center">
             <div className="w-full max-w-sm">
-                <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+                <section className="rounded-2xl border border-yellow-200 bg-white p-8 shadow-xl">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <FaInstagram className="mx-auto mb-3 text-5xl text-pink-600" aria-hidden="true" />
-                        <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">Instagram</h1>
+                        <div className="mx-auto mb-3 text-6xl drop-shadow-sm">⚡</div>
+                        <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">PikaChat</h1>
+                        <p className="mt-2 text-sm text-gray-600">Welcome back, Trainer!</p>
                     </div>
 
                     {/* Login Form */}
@@ -121,7 +128,7 @@ function Login() {
                             placeholder="Username, email or phone"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             autoComplete="username"
                             required
                         />
@@ -134,7 +141,7 @@ function Login() {
                                 placeholder="Authenticator app code"
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                                className={inputClasses}
                                 required
                             />
                         )}
@@ -144,7 +151,7 @@ function Login() {
                             placeholder="Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             autoComplete="current-password"
                             required
                         />
@@ -153,9 +160,9 @@ function Login() {
                         
                         <button 
                             type="submit" 
-                            className="w-full rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 p-3 font-semibold text-white hover:opacity-95 transition-opacity"
+                            className={buttonClasses}
                         >
-                            Log in
+                            Log in ⚡
                         </button>
                     </form>
 
@@ -166,15 +173,15 @@ function Login() {
 
                     {/* Forgot Password */}
                     <div className="my-4 flex items-center gap-3">
-                        <div className="flex-1 border-t border-gray-200"></div>
+                        <div className="flex-1 border-t border-yellow-200"></div>
                         <span className="text-sm text-gray-500">or</span>
-                        <div className="flex-1 border-t border-gray-200"></div>
+                        <div className="flex-1 border-t border-yellow-200"></div>
                     </div>
 
                     <button 
                         type="button"
                         onClick={() => setShowForgotPassword(!showForgotPassword)}
-                        className="w-full text-center text-sm font-semibold text-pink-600 hover:text-pink-700"
+                        className={`w-full text-center text-sm ${linkClasses}`}
                     >
                         Forgot password?
                     </button>
@@ -187,12 +194,12 @@ function Login() {
                                 value={recoveryEmail} 
                                 onChange={(e) => setRecoveryEmail(e.target.value)} 
                                 placeholder="Your account email" 
-                                className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                                className={inputClasses}
                             />
                             <button 
                                 type="button" 
                                 onClick={requestPasswordReset} 
-                                className="w-full rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 text-sm font-semibold text-white hover:opacity-95 transition-opacity"
+                                className="w-full rounded-lg bg-[#FFCB05] px-3 py-2 text-sm font-bold text-gray-900 hover:bg-[#e6b800] transition-colors"
                             >
                                 Send reset link
                             </button>
@@ -202,13 +209,13 @@ function Login() {
                 </section>
 
                 {/* Sign up CTA */}
-                <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
+                <div className="mt-4 rounded-lg border border-yellow-200 bg-white p-4 text-center shadow-sm">
                     <p className="text-sm text-gray-700">
                         Don't have an account? 
                         <button 
                             type="button"
                             onClick={() => navigate("/signup")}
-                            className="ml-1 font-semibold text-pink-600 hover:text-pink-700"
+                            className={`ml-1 ${linkClasses}`}
                         >
                             Sign up
                         </button>

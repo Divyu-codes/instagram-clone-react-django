@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaInstagram } from "react-icons/fa";
 
 const API_URL = import.meta.env.VITE_API_URL || "https://instagram-clone-react-django.onrender.com/api";
 
@@ -73,7 +72,6 @@ function Signup() {
             return;
         }
 
-        // client-side phone validation (optional)
         if (formData.phone) {
             const phoneClean = formData.phone.replace(/\D/g, "");
             const phoneRe = /^\d{10}$/;
@@ -152,14 +150,21 @@ function Signup() {
         }
     }
 
+    // =====================================================
+    // PIKACHAT THEME CLASSES
+    // =====================================================
+    const inputClasses = "w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-[#FFCB05] focus:ring-2 focus:ring-yellow-100 transition-all";
+    const buttonClasses = "w-full rounded-lg bg-[#FFCB05] p-3 font-bold text-gray-900 hover:bg-[#e6b800] transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    const linkClasses = "ml-1 font-semibold text-yellow-600 hover:text-yellow-700 transition-colors";
+
     if (verifyEmail) {
         return (
-            <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 px-4 py-10 flex items-center justify-center">
+            <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-[#FFFEF0] to-amber-50 px-4 py-10 flex items-center justify-center">
                 <div className="w-full max-w-sm">
-                    <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+                    <section className="rounded-2xl border border-yellow-200 bg-white p-8 shadow-xl">
                         <div className="mb-8 text-center">
-                            <FaInstagram className="mx-auto mb-3 text-5xl text-pink-600" />
-                            <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">Verify Email</h1>
+                            <div className="mx-auto mb-3 text-6xl drop-shadow-sm">⚡</div>
+                            <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">PikaChat</h1>
                             <p className="mt-2 text-sm text-gray-600">Enter the code sent to {formData.email}</p>
                         </div>
 
@@ -169,7 +174,7 @@ function Signup() {
                                 placeholder="Verification code"
                                 value={verificationCode}
                                 onChange={(e) => setVerificationCode(e.target.value)}
-                                className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                                className={inputClasses}
                                 required
                             />
 
@@ -178,20 +183,20 @@ function Signup() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 p-3 font-semibold text-white hover:opacity-95 transition-opacity disabled:opacity-50"
+                                className={buttonClasses}
                             >
                                 {loading ? "Verifying..." : "Verify Email"}
                             </button>
                         </form>
                     </section>
 
-                    <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
+                    <div className="mt-4 rounded-lg border border-yellow-200 bg-white p-4 text-center shadow-sm">
                         <p className="text-sm text-gray-700">
                             Already have an account?
                             <button
                                 type="button"
                                 onClick={() => navigate("/login")}
-                                className="ml-1 font-semibold text-pink-600 hover:text-pink-700"
+                                className={linkClasses}
                             >
                                 Log in
                             </button>
@@ -203,14 +208,14 @@ function Signup() {
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 px-4 py-10 flex items-center justify-center">
+        <main className="min-h-screen bg-gradient-to-br from-yellow-50 via-[#FFFEF0] to-amber-50 px-4 py-10 flex items-center justify-center">
             <div className="w-full max-w-sm">
-                <section className="rounded-2xl border border-gray-200 bg-white p-8 shadow-lg">
+                <section className="rounded-2xl border border-yellow-200 bg-white p-8 shadow-xl">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <FaInstagram className="mx-auto mb-3 text-5xl text-pink-600" aria-hidden="true" />
-                        <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">Instagram</h1>
-                        <p className="mt-2 text-sm text-gray-600">Create your account</p>
+                        <div className="mx-auto mb-3 text-6xl drop-shadow-sm">⚡</div>
+                        <h1 className="font-serif text-3xl font-bold tracking-tight text-gray-900">PikaChat</h1>
+                        <p className="mt-2 text-sm text-gray-600">Spark up your conversations!</p>
                     </div>
 
                     {/* Signup Form */}
@@ -222,7 +227,7 @@ function Signup() {
                                 placeholder="First name"
                                 value={formData.first_name}
                                 onChange={handleChange}
-                                className="flex-1 rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                                className={inputClasses}
                             />
                             <input
                                 type="text"
@@ -230,7 +235,7 @@ function Signup() {
                                 placeholder="Last name"
                                 value={formData.last_name}
                                 onChange={handleChange}
-                                className="flex-1 rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                                className={inputClasses}
                             />
                         </div>
 
@@ -240,7 +245,7 @@ function Signup() {
                             placeholder="Email address"
                             value={formData.email}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             required
                         />
 
@@ -250,7 +255,7 @@ function Signup() {
                             placeholder="Phone number (optional)"
                             value={formData.phone}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                         />
 
                         <input
@@ -259,7 +264,7 @@ function Signup() {
                             placeholder="Username"
                             value={formData.username}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             required
                         />
 
@@ -269,7 +274,7 @@ function Signup() {
                             placeholder="Password (8+ characters)"
                             value={formData.password}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             required
                         />
 
@@ -279,7 +284,7 @@ function Signup() {
                             placeholder="Confirm password"
                             value={formData.confirmPassword}
                             onChange={handleChange}
-                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-3 text-sm outline-none focus:border-pink-500 focus:ring-2 focus:ring-pink-100"
+                            className={inputClasses}
                             required
                         />
 
@@ -288,21 +293,21 @@ function Signup() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full rounded-lg bg-gradient-to-r from-pink-500 to-purple-600 p-3 font-semibold text-white hover:opacity-95 transition-opacity disabled:opacity-50"
+                            className={buttonClasses}
                         >
-                            {loading ? "Creating account..." : "Sign up"}
+                            {loading ? "Creating account..." : "Sign up ⚡"}
                         </button>
                     </form>
                 </section>
 
                 {/* Login CTA */}
-                <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4 text-center shadow-sm">
+                <div className="mt-4 rounded-lg border border-yellow-200 bg-white p-4 text-center shadow-sm">
                     <p className="text-sm text-gray-700">
                         Have an account?
                         <button
                             type="button"
                             onClick={() => navigate("/login")}
-                            className="ml-1 font-semibold text-pink-600 hover:text-pink-700"
+                            className={linkClasses}
                         >
                             Log in
                         </button>

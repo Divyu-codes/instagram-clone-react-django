@@ -39,30 +39,37 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="h-screen w-64 shrink-0 border-r border-gray-200 bg-white p-5 shadow-[0_0_35px_rgba(15,23,42,0.03)]">
+    <aside className="h-screen w-64 shrink-0 border-r border-yellow-100 bg-[#FFFEF0] p-5 shadow-[0_0_35px_rgba(255,203,5,0.05)]">
+      
+      {/* LOGO & APP NAME */}
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 via-red-500 to-orange-400 text-lg font-bold text-white shadow-lg shadow-pink-200">
-          I
+        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFCB05] text-2xl shadow-lg shadow-yellow-200">
+          ⚡
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Instagram</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">PikaChat</h1>
       </div>
 
+      {/* NAVIGATION MENU */}
       <nav className="space-y-2 text-base">
         {menuItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl p-3 transition ${
-                isActive ? "bg-gray-100 font-semibold text-black shadow-sm" : "text-gray-700 hover:bg-gray-50"
+              `flex items-center gap-3 rounded-2xl p-3 transition-all duration-200 ${
+                isActive 
+                  ? "bg-[#FFF9C4] font-bold text-gray-900 shadow-sm" 
+                  : "text-gray-700 hover:bg-yellow-50"
               }`
             }
             onClick={item.path === "/messages" ? markMessagesRead : undefined}
           >
             <span className="text-lg">{item.icon}</span>
             <span>{item.name}</span>
+            
+            {/* UNREAD BADGE */}
             {item.path === "/messages" && unreadCount > 0 && (
-              <span className="ml-auto rounded-full bg-red-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+              <span className="ml-auto rounded-full bg-[#FFCB05] px-2 py-0.5 text-[10px] font-bold text-black shadow-sm">
                 {unreadCount}
               </span>
             )}
@@ -70,12 +77,13 @@ function Sidebar() {
         ))}
       </nav>
 
+      {/* LOGOUT BUTTON */}
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-8 w-full rounded-2xl border border-red-200 bg-red-50 p-3 text-left font-medium text-red-600 transition hover:bg-red-100"
+        className="mt-8 w-full rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left font-medium text-yellow-800 transition hover:bg-red-50 hover:text-red-600 hover:border-red-200"
       >
-        Logout
+        Logout ⚡
       </button>
     </aside>
   );
