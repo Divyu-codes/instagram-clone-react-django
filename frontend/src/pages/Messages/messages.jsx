@@ -58,10 +58,6 @@ function getCurrentUserId() {
 
 // =========================================================
 // GET DJANGO USER ID
-//
-// IMPORTANT:
-// user_id is the actual Django User ID.
-// user.id may be a profile/object ID.
 // =========================================================
 
 function getUserId(user) {
@@ -87,14 +83,6 @@ function getUserId(user) {
 
 // =========================================================
 // CREATE ROOM NAME
-//
-// Example:
-// Divya = 9
-// Nancy = 12
-//
-// Both users MUST get:
-//
-// 9_12
 // =========================================================
 
 function getRoomName(
@@ -181,25 +169,10 @@ function Messages() {
   const [loading, setLoading] =
     useState(true);
 
-  // =======================================================
-  // UNREAD MESSAGES
-  //
-  // {
-  //   9: {
-  //     count: 2,
-  //     lastMessage: "hello"
-  //   }
-  // }
-  // =======================================================
-
   const [
     unreadMessages,
     setUnreadMessages,
   ] = useState({});
-
-  // =======================================================
-  // NOTIFICATION WEBSOCKET
-  // =======================================================
 
   const notificationSocketRef =
     useRef(null);
@@ -260,10 +233,6 @@ function Messages() {
           continue;
         }
 
-        // =================================================
-        // FIND UNREAD MESSAGES FROM THIS USER
-        // =================================================
-
         const unreadUserMessages =
           messages.filter(
             (message) => {
@@ -272,7 +241,6 @@ function Messages() {
                   message?.sender_id
                 );
 
-              // Newer backend can use seen_by
               const seenBy =
                 Array.isArray(
                   message?.seen_by
@@ -282,11 +250,9 @@ function Messages() {
                     )
                   : [];
 
-              // Older backend may use is_seen
               const isSeen =
                 message?.is_seen === true;
 
-              // If seen_by exists, use it.
               if (
                 Array.isArray(
                   message?.seen_by
@@ -303,7 +269,6 @@ function Messages() {
                 );
               }
 
-              // Fallback for old message format.
               return (
                 senderId ===
                   Number(userId) &&
@@ -340,10 +305,6 @@ function Messages() {
     setUnreadMessages(
       unread
     );
-
-    // =====================================================
-    // SAVE LOCALLY
-    // =====================================================
 
     const totalUnread =
       Object.values(
@@ -418,20 +379,6 @@ function Messages() {
         const data =
           await response.json();
 
-        console.log(
-          "MESSAGES USERS API:",
-          data
-        );
-
-        console.log(
-          "CURRENT USER ID:",
-          currentUserId
-        );
-
-        // =================================================
-        // CLEAN USERS
-        // =================================================
-
         const cleanedUsers =
           (
             Array.isArray(data)
@@ -471,13 +418,6 @@ function Messages() {
             }
           );
 
-        // =================================================
-        // ONLY SHOW USERS WHO CAN CHAT
-        //
-        // Backend returns 403 when neither user follows the other.
-        // This keeps unrelated users out of the Messages list.
-        // =================================================
-
         const allowedUsers = [];
 
         for (const user of cleanedUsers) {
@@ -513,18 +453,9 @@ function Messages() {
           }
         }
 
-        console.log(
-          "CHAT USERS AFTER FOLLOW ACCESS FILTER:",
-          allowedUsers
-        );
-
         setUsers(
           allowedUsers
         );
-
-        // =================================================
-        // LOAD EXISTING UNREAD MESSAGES
-        // =================================================
 
         await loadUnreadMessages(
           allowedUsers
@@ -546,20 +477,6 @@ function Messages() {
 
   // =======================================================
   // NOTIFICATION WEBSOCKET
-  //
-  // Backend:
-  //
-  // /ws/notifications/?token=JWT
-  //
-  // Backend sends:
-  //
-  // {
-  //   type: "new_message",
-  //   sender_id: 9,
-  //   message: "hello",
-  //   id: 123,
-  //   room_name: "9_12"
-  // }
   // =======================================================
 
   useEffect(() => {
@@ -571,9 +488,7 @@ function Messages() {
     }
 
     let socket = null;
-
     let reconnectTimer = null;
-
     let isUnmounted = false;
 
     const connectNotificationSocket =
@@ -601,11 +516,6 @@ function Messages() {
               token
             )}`;
 
-          console.log(
-            "Creating Notification WebSocket:",
-            wsUrl
-          );
-
           socket =
             new WebSocket(
               wsUrl
@@ -629,43 +539,6 @@ function Messages() {
                   event.data
                 );
 
-              console.log(
-                "========== NOTIFICATION RECEIVED =========="
-              );
-
-              console.log(
-                "Notification:",
-                data
-              );
-
-              console.log(
-                "Type:",
-                data?.type
-              );
-
-              console.log(
-                "Sender ID:",
-                data?.sender_id
-              );
-
-              console.log(
-                "Message:",
-                data?.message
-              );
-
-              console.log(
-                "Room:",
-                data?.room_name
-              );
-
-              console.log(
-                "============================================"
-              );
-
-              // =================================================
-              // ONLY HANDLE NEW CHAT MESSAGE
-              // =================================================
-
               if (
                 data?.type !==
                 "new_message"
@@ -688,10 +561,6 @@ function Messages() {
                 return;
               }
 
-              // =================================================
-              // CHECK IF THIS CHAT IS CURRENTLY OPEN
-              // =================================================
-
               const selectedId =
                 selectedUser
                   ? getUserId(
@@ -707,26 +576,11 @@ function Messages() {
                   senderId
                 );
 
-              // =================================================
-              // IF CHAT IS OPEN:
-              //
-              // Do NOT create unread badge.
-              // ChatWindow itself receives the actual message.
-              // =================================================
-
               if (
                 isCurrentChat
               ) {
-                console.log(
-                  "Message belongs to currently open chat. No unread badge."
-                );
-
                 return;
               }
-
-              // =================================================
-              // OTHERWISE INCREASE UNREAD COUNT
-              // =================================================
 
               setUnreadMessages(
                 (previous) => {
@@ -753,10 +607,6 @@ function Messages() {
                         "New message",
                     },
                   };
-
-                  // =============================================
-                  // SAVE TO LOCAL STORAGE
-                  // =============================================
 
                   localStorage.setItem(
                     "unread_messages_by_sender",
@@ -791,10 +641,6 @@ function Messages() {
                   return newData;
                 }
               );
-
-              // =================================================
-              // NOTIFICATION SOUND
-              // =================================================
 
               try {
                 const audio =
@@ -835,12 +681,6 @@ function Messages() {
           socket.onclose = (
             event
           ) => {
-            console.log(
-              "Notification WebSocket CLOSED:",
-              event.code,
-              event.reason
-            );
-
             notificationSocketRef.current =
               null;
 
@@ -865,10 +705,6 @@ function Messages() {
       };
 
     connectNotificationSocket();
-
-    // =======================================================
-    // CLEANUP
-    // =======================================================
 
     return () => {
       isUnmounted = true;
@@ -963,52 +799,6 @@ function Messages() {
           return;
         }
 
-        // =================================================
-        // DEBUG
-        // =================================================
-
-        console.log(
-          "================================="
-        );
-
-        console.log(
-          "CHAT SELECTION"
-        );
-
-        console.log(
-          "Current User ID:",
-          currentUserId
-        );
-
-        console.log(
-          "Selected Username:",
-          user?.username
-        );
-
-        console.log(
-          "Selected Profile ID:",
-          user?.id
-        );
-
-        console.log(
-          "Selected Django User ID:",
-          user?.user_id
-        );
-
-        console.log(
-          "Selected User ID USED FOR CHAT:",
-          selectedUserId
-        );
-
-        console.log(
-          "ROOM NAME:",
-          newRoomName
-        );
-
-        console.log(
-          "================================="
-        );
-
         setToken(
           validToken
         );
@@ -1016,10 +806,6 @@ function Messages() {
         setSelectedUser(
           user
         );
-
-        // =================================================
-        // CLEAR UNREAD FOR THIS USER
-        // =================================================
 
         setUnreadMessages(
           (previous) => {
@@ -1030,10 +816,6 @@ function Messages() {
             delete next[
               selectedUserId
             ];
-
-            // =============================================
-            // SAVE UPDATED UNREAD DATA
-            // =============================================
 
             localStorage.setItem(
               "unread_messages_by_sender",
@@ -1101,11 +883,11 @@ function Messages() {
       : null;
 
   // =======================================================
-  // RENDER
+  // RENDER (PIKACHAT THEME APPLIED ⚡)
   // =======================================================
 
   return (
-    <div className="flex h-[calc(100vh-60px)] bg-white">
+    <div className="flex h-[calc(100vh-60px)] bg-[#FFFEF0]">
 
       {/* =================================================
           LEFT SIDEBAR
@@ -1123,11 +905,11 @@ function Messages() {
 
             <div>
               <h1 className="text-xl font-bold text-gray-900">
-                Messages
+                PikaChat ⚡
               </h1>
 
               <p className="mt-0.5 text-xs text-gray-500">
-                Your conversations
+                Your electric conversations ⚡
               </p>
             </div>
 
@@ -1136,11 +918,11 @@ function Messages() {
                 ============================================= */}
 
             {totalUnread > 0 && (
-              <div className="flex items-center gap-2 rounded-full bg-red-50 px-3 py-1.5">
+              <div className="flex items-center gap-2 rounded-full bg-yellow-50 px-3 py-1.5">
 
-                <span className="h-2 w-2 rounded-full bg-red-500" />
+                <span className="h-2 w-2 rounded-full bg-[#FFCB05]" />
 
-                <span className="text-xs font-semibold text-red-600">
+                <span className="text-xs font-semibold text-yellow-700">
                   {totalUnread > 99
                     ? "99+"
                     : totalUnread}{" "}
@@ -1195,15 +977,15 @@ function Messages() {
               <div>
 
                 <div className="mb-2 text-3xl">
-                  💬
+                  ⚡
                 </div>
 
                 <p className="text-sm font-medium text-gray-700">
-                  No users found
+                  No trainers found ⚡
                 </p>
 
                 <p className="mt-1 text-xs text-gray-400">
-                  Start following people to chat.
+                  Start following trainers to spark a chat!
                 </p>
 
               </div>
@@ -1235,10 +1017,6 @@ function Messages() {
                 const isSelected =
                   selectedUserId ===
                   userId;
-
-                // =========================================
-                // UNREAD DATA
-                // =========================================
 
                 const unread =
                   unreadMessages[
@@ -1284,7 +1062,7 @@ function Messages() {
                         isSelected
                           ? "bg-gray-100"
                           : hasUnread
-                          ? "bg-blue-50/70 hover:bg-blue-50"
+                          ? "bg-yellow-50/70 hover:bg-yellow-100"
                           : "hover:bg-gray-50"
                       }
                     `}
@@ -1295,7 +1073,7 @@ function Messages() {
                         =================================== */}
 
                     {hasUnread && (
-                      <span className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-blue-500" />
+                      <span className="absolute left-0 top-0 h-full w-1 rounded-r-full bg-[#FFCB05]" />
                     )}
 
                     {/* ===================================
@@ -1313,7 +1091,7 @@ function Messages() {
                           bg-gray-200
                           ${
                             hasUnread
-                              ? "ring-2 ring-blue-400 ring-offset-2"
+                              ? "ring-2 ring-[#FFCB05] ring-offset-2"
                               : ""
                           }
                         `}
@@ -1336,11 +1114,11 @@ function Messages() {
                       </div>
 
                       {/* =================================
-                          RED BADGE
+                          RED/YELLOW BADGE
                           ================================= */}
 
                       {hasUnread && (
-                        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                        <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#FFCB05] px-1 text-[10px] font-bold text-black shadow-sm ring-2 ring-white">
                           {unreadCount >
                           99
                             ? "99+"
@@ -1372,7 +1150,7 @@ function Messages() {
                         </p>
 
                         {hasUnread && (
-                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-blue-600">
+                          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-yellow-600">
                             New
                           </span>
                         )}
@@ -1395,17 +1173,17 @@ function Messages() {
                         <div className="mt-1 flex items-center gap-1.5">
 
                           <span className="text-xs">
-                            💬
+                            ⚡
                           </span>
 
-                          <p className="truncate text-xs font-semibold text-blue-600">
+                          <p className="truncate text-xs font-semibold text-yellow-600">
                             {lastMessage}
                           </p>
 
                         </div>
                       ) : (
                         <p className="mt-1 text-xs text-gray-400">
-                          Tap to chat
+                          Tap to spark a chat ⚡
                         </p>
                       )}
 
@@ -1420,7 +1198,7 @@ function Messages() {
                         text-sm transition
                         ${
                           hasUnread
-                            ? "text-blue-500"
+                            ? "text-yellow-500"
                             : "text-gray-300 group-hover:text-gray-500"
                         }
                       `}
@@ -1445,31 +1223,31 @@ function Messages() {
       <div className="flex min-w-0 flex-1">
 
         {!selectedUser ? (
-          <div className="flex flex-1 items-center justify-center bg-gray-50">
+          <div className="flex flex-1 items-center justify-center bg-[#FFFDE7]">
 
             <div className="text-center">
 
               <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white text-4xl shadow-sm">
-                💬
+                ⚡
               </div>
 
               <h2 className="text-lg font-semibold text-gray-800">
-                Your Messages
+                PikaChat Messages ⚡
               </h2>
 
               <p className="mt-1 text-sm text-gray-500">
-                Select a conversation to start chatting
+                Select a trainer to start chatting!
               </p>
 
               {totalUnread > 0 && (
-                <p className="mt-3 text-xs font-semibold text-blue-600">
+                <p className="mt-3 text-xs font-semibold text-yellow-600">
                   You have{" "}
                   {totalUnread}{" "}
                   new{" "}
                   {totalUnread ===
                   1
-                    ? "message"
-                    : "messages"}
+                    ? "zap ⚡"
+                    : "zaps ⚡"}
                 </p>
               )}
 

@@ -1362,31 +1362,6 @@ export default function ChatWindow({
 
 
 
-                /*
-
-                 * IMPORTANT:
-
-                 *
-
-                 * Don't simply do:
-
-                 *
-
-                 * setMessages(history)
-
-                 *
-
-                 * because WebSocket may already have
-
-                 * delivered a new message.
-
-                 *
-
-                 * Merge history + current state instead.
-
-                 */
-
-
 
                 setMessages((previous) => {
 
