@@ -39,9 +39,10 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="h-full w-64 shrink-0 border-r border-yellow-100 bg-[#FFFEF0] p-5 flex flex-col">
-
-      {/* LOGO & APP NAME */}
+    // Yahan flex flex-col lagaya hai taaki logout button niche chipak jaye
+    <aside className="h-screen w-64 shrink-0 border-r border-yellow-100 bg-[#FFFEF0] p-5 flex flex-col shadow-[0_0_35px_rgba(255,203,5,0.05)]">
+      
+      {/* LOGO */}
       <div className="mb-8 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFCB05] text-2xl shadow-lg shadow-yellow-200">
           ⚡
@@ -49,24 +50,24 @@ function Sidebar() {
         <h1 className="text-2xl font-bold tracking-tight text-gray-900">PikaChat</h1>
       </div>
 
-      {/* NAVIGATION MENU */}
-      <nav className="space-y-2 text-base">
+      {/* MENU (flex-1 lagane se ye beech ki jagah le lega) */}
+      <nav className="space-y-2 text-base flex-1">
         {menuItems.map((item) => (
           <NavLink
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl p-3 transition-all duration-200 ${isActive
-                ? "bg-[#FFF9C4] font-bold text-gray-900 shadow-sm"
-                : "text-gray-700 hover:bg-yellow-50"
+              `flex items-center gap-3 rounded-2xl p-3 transition-all duration-200 ${
+                isActive 
+                  ? "bg-[#FFF9C4] font-bold text-gray-900 shadow-sm" 
+                  : "text-gray-700 hover:bg-yellow-50"
               }`
             }
             onClick={item.path === "/messages" ? markMessagesRead : undefined}
           >
             <span className="text-lg">{item.icon}</span>
             <span>{item.name}</span>
-
-            {/* UNREAD BADGE */}
+            
             {item.path === "/messages" && unreadCount > 0 && (
               <span className="ml-auto rounded-full bg-[#FFCB05] px-2 py-0.5 text-[10px] font-bold text-black shadow-sm">
                 {unreadCount}
@@ -76,13 +77,14 @@ function Sidebar() {
         ))}
       </nav>
 
-      {/* LOGOUT BUTTON */}
-
+      {/* LOGOUT BUTTON (Ab ye bilkul sahi dikhega) */}
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-auto w-full rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left font-medium text-yellow-800 transition hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-      ></button>
+        className="w-full rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left font-medium text-yellow-800 transition hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+      >
+        Logout ⚡
+      </button>
     </aside>
   );
 }

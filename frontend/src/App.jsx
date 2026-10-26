@@ -20,7 +20,8 @@ import VerifyEmail from "./pages/Auth/VerifyEmail";
 
 function AuthenticatedLayout({ children }) {
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    // Yahan bg-gray-50 ko hata kar bg-[#FFFEF0] (PikaChat Yellow) kar diya hai
+    <div className="flex min-h-screen bg-[#FFFEF0]">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-6xl px-4 py-6">{children}</div>
