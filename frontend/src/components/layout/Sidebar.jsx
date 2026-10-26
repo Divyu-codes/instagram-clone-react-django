@@ -39,8 +39,8 @@ function Sidebar() {
   ];
 
   return (
-    <aside className="h-screen w-64 shrink-0 border-r border-yellow-100 bg-[#FFFEF0] p-5 shadow-[0_0_35px_rgba(255,203,5,0.05)]">
-      
+    <aside className="h-full w-64 shrink-0 border-r border-yellow-100 bg-[#FFFEF0] p-5 flex flex-col">
+
       {/* LOGO & APP NAME */}
       <div className="mb-8 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#FFCB05] text-2xl shadow-lg shadow-yellow-200">
@@ -56,17 +56,16 @@ function Sidebar() {
             key={item.name}
             to={item.path}
             className={({ isActive }) =>
-              `flex items-center gap-3 rounded-2xl p-3 transition-all duration-200 ${
-                isActive 
-                  ? "bg-[#FFF9C4] font-bold text-gray-900 shadow-sm" 
-                  : "text-gray-700 hover:bg-yellow-50"
+              `flex items-center gap-3 rounded-2xl p-3 transition-all duration-200 ${isActive
+                ? "bg-[#FFF9C4] font-bold text-gray-900 shadow-sm"
+                : "text-gray-700 hover:bg-yellow-50"
               }`
             }
             onClick={item.path === "/messages" ? markMessagesRead : undefined}
           >
             <span className="text-lg">{item.icon}</span>
             <span>{item.name}</span>
-            
+
             {/* UNREAD BADGE */}
             {item.path === "/messages" && unreadCount > 0 && (
               <span className="ml-auto rounded-full bg-[#FFCB05] px-2 py-0.5 text-[10px] font-bold text-black shadow-sm">
@@ -78,13 +77,12 @@ function Sidebar() {
       </nav>
 
       {/* LOGOUT BUTTON */}
+
       <button
         type="button"
         onClick={handleLogout}
-        className="mt-8 w-full rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left font-medium text-yellow-800 transition hover:bg-red-50 hover:text-red-600 hover:border-red-200"
-      >
-        Logout ⚡
-      </button>
+        className="mt-auto w-full rounded-2xl border border-yellow-200 bg-yellow-50 p-3 text-left font-medium text-yellow-800 transition hover:bg-red-50 hover:text-red-600 hover:border-red-200"
+      ></button>
     </aside>
   );
 }
