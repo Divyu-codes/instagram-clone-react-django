@@ -1231,9 +1231,10 @@ export default function ChatWindow({
                                         </div>
                                     )}
 
-                                    {/* BUBBLE */}
+                                    {/* BUBBLE (POP ANIMATION ADDED HERE ⚡) */}
 
                                     <div
+                                        className="pika-bubble-pop"
                                         style={{
                                             ...styles.bubble,
                                             ...(isMine
@@ -1274,7 +1275,7 @@ export default function ChatWindow({
                                                 ...styles.time,
                                                 color:
                                                     isMine
-                                                        ? "rgba(0,0,0,0.6)" // Darker text for yellow bubble
+                                                        ? "rgba(0,0,0,0.6)"
                                                         : "#999",
                                             }}
                                         >
@@ -1427,7 +1428,7 @@ const styles = {
         minHeight: "500px",
         display: "flex",
         flexDirection: "column",
-        background: "#FFFEF0", // Warm yellow background
+        background: "#FFFEF0",
         position: "relative",
     },
 
@@ -1480,7 +1481,7 @@ const styles = {
     },
 
     activeDot: {
-        color: "#FFCB05", // Yellow bolt for active status
+        color: "#FFCB05",
         marginRight: "5px",
         fontSize: "14px",
     },
@@ -1489,7 +1490,7 @@ const styles = {
         flex: 1,
         overflowY: "auto",
         padding: "24px",
-        background: "#FFFDE7", // Light yellow chat area
+        background: "#FFFDE7",
     },
 
     messageRow: {
@@ -1511,8 +1512,8 @@ const styles = {
     },
 
     myBubble: {
-        background: "#FFCB05", // Pikachu Yellow!
-        color: "#111827", // Dark text for contrast
+        background: "#FFCB05",
+        color: "#111827",
         borderBottomRightRadius: "5px",
     },
 

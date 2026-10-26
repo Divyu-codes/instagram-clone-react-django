@@ -185,4 +185,19 @@
 body, html, #root {
     background-color: #FFFEF0 !important; 
 }
- 
+/* PikaChat Bubble Pop Animation */
+@keyframes pikaPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pika-bubble-pop {
+  animation: pikaPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  transform-origin: bottom center;
+}
