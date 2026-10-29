@@ -5,6 +5,7 @@ A fully functional, Instagram-inspired social media application built using Reac
 The project includes secure authentication, dynamic feeds, real-time chat with a hybrid messaging system, stories, follow systems, and real-time notifications.
 
 ---
+🔗 **Live Demo:** [Click here to visit PikaChat](https://instagram-clone-react-django.vercel.app)
 
 ## ✨ Features
 
@@ -13,7 +14,7 @@ The project includes secure authentication, dynamic feeds, real-time chat with a
 - Protected Routes
 - JWT Authentication
 - Password Reset & Email Verification
-- Google OAuth Authentication
+- Google OAuth Authenticatio
 
 ### 🏠 Social Feed
 - Dynamic Instagram-style feed
