@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import timedelta
-
+from cloudinary.models import CloudinaryField 
 
 class Story(models.Model):
 
@@ -18,9 +18,10 @@ class Story(models.Model):
         null=True
     )
 
-    video = models.FileField(
-        upload_to="stories/videos/",
-        blank=True,
+    video = CloudinaryField(
+        'video', 
+        resource_type='video',  
+        blank=True, 
         null=True
     )
 
