@@ -7,6 +7,13 @@ The project includes secure authentication, dynamic feeds, real-time chat with a
 ---
 🔗 **Live Demo:** [Click here to visit PikaChat](https://instagram-clone-react-django.vercel.app)
 
+## 🎮 Demo Credentials
+Want to test the app without creating an account? Use these test credentials:
+- **Username:** `Testuser` 
+- **Password:** `test12345` 
+
+> ⚠️ **Note:** This is a shared demo account. Please do not change the password or delete existing posts.
+
 ## ✨ Features
 
 ### 🔐 Authentication
