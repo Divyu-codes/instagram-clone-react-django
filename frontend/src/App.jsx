@@ -13,6 +13,7 @@ import Stories from "./components/story/Stories";
 import Notification from "./components/Notification/Notification";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import Sidebar from "./components/layout/Sidebar";
+import MobileNav from "./components/layout/MobileNav"; // ✅ Already imported
 
 import Security from "./pages/Auth/Security";
 import ResetPassword from "./pages/Auth/ResetPassword";
@@ -20,12 +21,16 @@ import VerifyEmail from "./pages/Auth/VerifyEmail";
 
 function AuthenticatedLayout({ children }) {
   return (
-    // Yahan bg-gray-50 ko hata kar bg-[#FFFEF0] (PikaChat Yellow) kar diya hai
     <div className="flex min-h-screen bg-[#FFFEF0]">
       <Sidebar />
-      <main className="flex-1 overflow-y-auto">
+      
+      {/* CHANGE 1: pb-20 md:pb-0 add kiya hai taaki mobile par niche jagah bane */}
+      <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
         <div className="mx-auto max-w-6xl px-4 py-6">{children}</div>
       </main>
+
+      {/* CHANGE 2: MobileNav ko yahan add kiya hai (Sirf authenticated users ke liye) */}
+      <MobileNav />
     </div>
   );
 }
