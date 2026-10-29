@@ -24,12 +24,11 @@ function AuthenticatedLayout({ children }) {
     <div className="flex min-h-screen bg-[#FFFEF0]">
       <Sidebar />
       
-      {/* CHANGE 1: pb-20 md:pb-0 add kiya hai taaki mobile par niche jagah bane */}
+      
       <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
         <div className="mx-auto max-w-6xl px-4 py-6">{children}</div>
       </main>
 
-      {/* CHANGE 2: MobileNav ko yahan add kiya hai (Sirf authenticated users ke liye) */}
       <MobileNav />
     </div>
   );
